@@ -1,167 +1,505 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>China's Economy in 2025: Resilience Amid Global Headwinds</title>
-    <style>
-        /* Imitating The Economist's clean, serif-based typography and layout */
-        body {
-            font-family: Georgia, serif; /* Serif font for body text, classic Economist feel */
-            line-height: 1.7; /* Ample line spacing for readability */
-            margin: 0;
-            padding: 0;
-            color: #000; /* Black text on white for high contrast */
-            background-color: #fff;
-            font-size: 16px; /* Base font size */
-        }
-        header {
-            text-align: left;
-            padding: 40px 0 20px;
-            border-bottom: 1px solid #ccc; /* Subtle divider */
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        header h1 {
-            font-size: 2.5em; /* Large, bold title */
-            margin: 0 0 10px 0;
-            color: #e3120b; /* Economist's signature red for accents */
-            font-weight: bold;
-        }
-        header .subtitle {
-            font-size: 1.4em;
-            color: #333;
-            margin: 0;
-            font-style: italic; /* Subtle italic for subhead */
-        }
-        header .byline {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 10px;
-        }
-        .article {
-            max-width: 800px; /* Centered, readable column width */
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .article p {
-            margin: 1.2em 0; /* Generous paragraph spacing */
-            text-align: justify; /* Justified text for a newspaper feel */
-        }
-        .article h2 {
-            font-size: 1.6em;
-            color: #e3120b; /* Red for section headings */
-            border-bottom: 1px solid #e3120b; /* Underline in red */
-            padding-bottom: 5px;
-            margin: 2em 0 1em;
-            font-weight: bold;
-        }
-        .article .lead {
-            font-size: 1.2em; /* Larger lead paragraph */
-            font-weight: bold;
-            margin-top: 0;
-        }
-        .article .caption {
-            font-size: 0.85em;
-            color: #666;
-            margin: 5px 0;
-            text-align: center;
-        }
-        .article img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-            border: 1px solid #ddd; /* Subtle border for images */
-        }
-        .article .pullquote {
-            font-size: 1.5em;
-            color: #e3120b;
-            border-left: 4px solid #e3120b;
-            padding-left: 20px;
-            margin: 20px 0;
-            font-style: italic;
-        }
-        .article ul {
-            list-style-type: disc;
-            margin: 1em 0 1em 20px;
-        }
-        .article li {
-            margin-bottom: 0.5em;
-        }
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            border-top: 1px solid #ccc;
-            font-size: 0.9em;
-            color: #666;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        /* Additional complexities: Responsive design, hover effects */
-        @media (max-width: 600px) {
-            body {
-                font-size: 14px;
-            }
-            header h1 {
-                font-size: 2em;
-            }
-            .article {
-                padding: 10px;
-            }
-        }
-        a {
-            color: #e3120b; /* Red links */
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline; /* Hover effect */
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>∞</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    cursor: none;
+  }
+
+  canvas {
+    position: fixed;
+    inset: 0;
+    display: block;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    transition: transform 0.1s;
+    box-shadow: 0 0 12px rgba(255,255,255,0.6), 0 0 40px rgba(180,220,255,0.3);
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+    transition: transform 0.15s, width 0.3s, height 0.3s, opacity 0.3s;
+  }
+
+  /* Quote overlay */
+  .quote-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .quote-wrap {
+    text-align: center;
+    max-width: 560px;
+    padding: 0 40px;
+  }
+
+  .quote-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: rgba(255, 255, 255, 0.0);
+    line-height: 1.75;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 40px rgba(160,200,255,0.4);
+    transition: color 2s ease, opacity 2s ease;
+  }
+  .quote-text.visible {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .quote-author {
+    margin-top: 18px;
+    font-family: 'Cinzel', serif;
+    font-weight: 300;
+    font-size: clamp(9px, 0.85vw, 11px);
+    letter-spacing: 0.35em;
+    color: rgba(255,255,255,0.0);
+    text-transform: uppercase;
+    transition: color 2s ease 0.4s;
+  }
+  .quote-author.visible {
+    color: rgba(160, 200, 255, 0.55);
+  }
+
+  /* Name / title */
+  .name-tag {
+    position: fixed;
+    bottom: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cinzel', serif;
+    font-weight: 300;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: rgba(255,255,255,0.18);
+    z-index: 10;
+    pointer-events: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* Corner coord display */
+  .coords {
+    position: fixed;
+    top: 28px;
+    right: 32px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: rgba(255,255,255,0.12);
+    z-index: 10;
+    pointer-events: none;
+    line-height: 1.8;
+  }
+</style>
 </head>
 <body>
-    <header>
-        <h1>China's Economy in 2025: Resilience Amid Global Headwinds</h1>
-        <p class="subtitle">As tariffs bite and domestic challenges persist, China's growth hits targets in unexpected ways</p>
-        <p class="byline">Feb 16th 2026 | Beijing | 8 min read</p>
-    </header>
-    <article>
-        <p class="lead">IN A YEAR marked by escalating trade tensions and internal economic pressures, China managed to meet its official GDP growth target of 5% for 2025. But the achievement came in a peculiar fashion, buoyed by a record trade surplus while fixed-asset investment contracted for the first time in decades. This paradox underscores the strengths and vulnerabilities of the world's second-largest economy.</p>
-        
-        <img src="https://via.placeholder.com/800x400?text=Chart:+China%27s+GDP+Growth+and+Trade+Surplus+in+2025" alt="Chart showing China's GDP growth and trade surplus in 2025">
-        <p class="caption">Chart 1: GDP growth met the target, driven by exports (Source: National Bureau of Statistics)</p>
-        
-        <h2>The Trade Juggernaut</h2>
-        <p>China's export machine roared ahead in 2025, posting a trade surplus of nearly $1.2trn despite punitive tariffs from America and Europe. This was fueled by dominance in green technologies—solar panels, wind turbines, and electric vehicles—where Chinese firms control 60-80% of global supply chains. The country's share of world manufacturing value added now exceeds one-third, allowing it to wield significant influence over global markets.</p>
-        
-        <p>Donald Trump's policies, ironically, played a role. By imposing tariffs, America inadvertently pushed allies toward Chinese suppliers for critical components, highlighting Beijing's industrial chokeholds. In artificial intelligence, firms like DeepSeek advanced rapidly, circumventing U.S. restrictions and demonstrating China's innovative edge.</p>
-        
-        <div class="pullquote">"China's economy is in great health, transitioning to innovation and green tech." — State media editorial</div>
-        
-        <h2>Investment Slump and Domestic Woes</h2>
-        <p>Yet beneath the export boom lies a stark contrast: fixed-asset investment (FAI) shrank for the first time since 1989. Critics point to overcapacity in manufacturing and a collapsing property market, where secondary prices fell over 20% from their peak. Factory-gate prices declined for 38 consecutive months, signaling persistent deflation.</p>
-        
-        <p>Consumer spending remained anemic, with per-capita services consumption at just 46.1%—far below the U.S.'s 70%. Subsidies for appliances and cars provided a temporary boost in 2025, but analysts warn of a "payback" period in 2026, where replacements slow.</p>
-        
-        <img src="https://via.placeholder.com/800x400?text=Chart:+Decline+in+Fixed-Asset+Investment" alt="Chart showing decline in fixed-asset investment in 2025">
-        <p class="caption">Chart 2: FAI contraction signals deeper issues (Source: Official data)</p>
-        
-        <h2>Shift to Services and Stimulus</h2>
-        <p>In response, Beijing pivoted toward services in late 2025, exemplified by the booming "ice and snow" economy. Ski resorts and winter sports equipment manufacturing are projected to reach 1.5trn yuan ($217bn) by 2030, up from 1trn in 2025. Local governments pledged investments in tourism and consumer sectors, aiming to rebalance from heavy industry.</p>
-        
-        <ul>
-            <li><strong>Pharma Innovation:</strong> Chinese drug firms now rival U.S. peers in clinical trials, conducting them faster and attracting Western R&D labs.</li>
-            <li><strong>Rare-Earth Leverage:</strong> Export restrictions on critical minerals showcased China's willingness to weaponize dependencies.</li>
-            <li><strong>Research Dominance:</strong> Leading in 66 of 74 key scientific fields, per the Australian Strategic Policy Institute.</li>
-        </ul>
-        
-        <h2>Long-Term Risks</h2>
-        <p>Despite these strengths, rigid politics could stifle dynamism. Xi Jinping's emphasis on strategic manufacturing exacerbates overcapacity, while the property slump drags on. The economy's confidence in its model—dismissing external critiques—may blind it to necessary reforms.</p>
-        
-        <p>As 2026 looms, questions abound: Will trade wars intensify? Can services offset manufacturing woes? China's 2025 performance proved its resilience, but sustainable growth demands bolder domestic stimulus and flexibility.</p>
-    </article>
-    <footer>
-        <p>© 2026 The Economist Newspaper Limited. All rights reserved. (This is a simulated article for demonstration purposes.)</p>
-    </footer>
+
+<canvas id="c"></canvas>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<div class="quote-container">
+  <div class="quote-wrap">
+    <div class="quote-text" id="quote-text"></div>
+    <div class="quote-author" id="quote-author"></div>
+  </div>
+</div>
+
+<div class="name-tag" id="name-tag">— sisyphite.github.io —</div>
+
+<div style="position:fixed;bottom:28px;right:32px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.25em;color:rgba(255,255,255,0.1);z-index:10;pointer-events:none;text-transform:uppercase;">made by Claude</div>
+
+<div class="coords" id="coords"></div>
+
+<script>
+// ── Quotes ──
+const quotes = [
+  { text: "The cosmos is within us.\nWe are made of star-stuff.", author: "Carl Sagan" },
+  { text: "Existence precedes essence.", author: "Jean-Paul Sartre" },
+  { text: "Not only is the universe stranger than we think,\nit is stranger than we can think.", author: "Werner Heisenberg" },
+  { text: "The most beautiful thing we can experience\nis the mysterious.", author: "Albert Einstein" },
+  { text: "To be is to be perceived.", author: "George Berkeley" },
+  { text: "We are all just walking each other home.", author: "Ram Dass" },
+  { text: "The eternal silence of these infinite spaces\nfrightens me.", author: "Blaise Pascal" },
+  { text: "Man is condemned to be free.", author: "Jean-Paul Sartre" },
+  { text: "In the beginning was the void,\nand the void was without form.", author: "∅" },
+  { text: "Mathematics is the language\nin which God has written the universe.", author: "Galileo Galilei" },
+  { text: "I think, therefore I am.", author: "René Descartes" },
+  { text: "The unexamined life is not worth living.", author: "Socrates" },
+  { text: "God is dead. God remains dead.\nAnd we have killed him.", author: "Friedrich Nietzsche" },
+  { text: "He who has a why to live\ncan bear almost any how.", author: "Friedrich Nietzsche" },
+  { text: "What we observe is not nature itself,\nbut nature exposed to our method of questioning.", author: "Werner Heisenberg" },
+  { text: "The only true wisdom is in knowing\nyou know nothing.", author: "Socrates" },
+  { text: "One cannot step into the same river twice.", author: "Heraclitus" },
+  { text: "Everything flows.", author: "Heraclitus" },
+  { text: "The universe is under no obligation\nto make sense to you.", author: "Neil deGrasse Tyson" },
+  { text: "Two things are infinite: the universe\nand human stupidity.", author: "Albert Einstein" },
+  { text: "If you wish to make an apple pie from scratch,\nyou must first invent the universe.", author: "Carl Sagan" },
+  { text: "We are a way for the cosmos\nto know itself.", author: "Carl Sagan" },
+  { text: "Somewhere, something incredible\nis waiting to be known.", author: "Carl Sagan" },
+  { text: "The brain is wider than the sky.", author: "Emily Dickinson" },
+  { text: "Hell is other people.", author: "Jean-Paul Sartre" },
+  { text: "The obstacle is the path.", author: "Zen proverb" },
+  { text: "Before enlightenment, chop wood, carry water.\nAfter enlightenment, chop wood, carry water.", author: "Zen proverb" },
+  { text: "Form is emptiness.\nEmptiness is form.", author: "Heart Sutra" },
+  { text: "The Tao that can be told\nis not the eternal Tao.", author: "Laozi" },
+  { text: "To know others is wisdom.\nTo know oneself is enlightenment.", author: "Laozi" },
+  { text: "Reality is merely an illusion,\nalbeit a very persistent one.", author: "Albert Einstein" },
+  { text: "Imagination is more important\nthan knowledge.", author: "Albert Einstein" },
+  { text: "A human being is a part of the whole,\ncalled by us 'Universe'.", author: "Albert Einstein" },
+  { text: "The most incomprehensible thing about the universe\nis that it is comprehensible.", author: "Albert Einstein" },
+  { text: "All of humanity's problems stem from\nman's inability to sit quietly in a room alone.", author: "Blaise Pascal" },
+  { text: "The heart has reasons\nthat reason cannot know.", author: "Blaise Pascal" },
+  { text: "The present moment\nalways will have been.", author: "∅" },
+  { text: "I would rather have questions that can't be answered\nthan answers that can't be questioned.", author: "Richard Feynman" },
+  { text: "The first principle is that you must not fool yourself —\nand you are the easiest person to fool.", author: "Richard Feynman" },
+  { text: "知者不博，博者不知。", author: "老子" },
+  { text: "为学日益，为道日损。", author: "老子" },
+  { text: "知足者富。", author: "老子" },
+  { text: "吾生也有涯，而知也无涯。\n以有涯随无涯，殆已。", author: "庄子" },
+  { text: "天地与我并生，\n而万物与我为一。", author: "庄子" },
+  { text: "方生方死，方死方生。", author: "庄子" },
+  { text: "色即是空，空即是色。", author: "心经" },
+  { text: "凡所有相，皆是虚妄。", author: "金刚经" },
+  { text: "应无所住而生其心。", author: "金刚经" },
+  { text: "菩提本无树，明镜亦非台。\n本来无一物，何处惹尘埃。", author: "慧能" },
+  { text: "Not all those who wander\nare lost.", author: "J.R.R. Tolkien" },
+  { text: "The cave you fear to enter\nholds the treasure you seek.", author: "Joseph Campbell" },
+  { text: "We shall not cease from exploration,\nand the end of all our exploring\nwill be to arrive where we started.", author: "T.S. Eliot" },
+  { text: "To be or not to be,\nthat is the question.", author: "Shakespeare" },
+  { text: "All the world's a stage,\nand all the men and women merely players.", author: "Shakespeare" },
+  { text: "There are more things in heaven and earth\nthan are dreamt of in your philosophy.", author: "Shakespeare" },
+  { text: "It does not matter how slowly you go\nas long as you do not stop.", author: "Confucius" },
+  { text: "Everything has beauty,\nbut not everyone sees it.", author: "Confucius" },
+  { text: "Silence is a source of great strength.", author: "Laozi" },
+  { text: "The journey of a thousand miles\nbegins with one step.", author: "Laozi" },
+  { text: "You are not a drop in the ocean.\nYou are the entire ocean in a drop.", author: "Rumi" },
+  { text: "Out beyond ideas of wrongdoing and rightdoing,\nthere is a field. I'll meet you there.", author: "Rumi" },
+  { text: "The wound is the place\nwhere the light enters you.", author: "Rumi" },
+  { text: "What you seek\nis seeking you.", author: "Rumi" },
+  { text: "Look up at the stars\nand not down at your feet.", author: "Stephen Hawking" },
+  { text: "We are just an advanced breed of monkeys\non a minor planet of a very average star.", author: "Stephen Hawking" },
+  { text: "The world is everything\nthat is the case.", author: "Ludwig Wittgenstein" },
+  { text: "Whereof one cannot speak,\nthereof one must be silent.", author: "Ludwig Wittgenstein" },
+  { text: "The limits of my language\nmean the limits of my world.", author: "Ludwig Wittgenstein" },
+  { text: "Life is what happens\nwhile you are busy making other plans.", author: "John Lennon" },
+  { text: "Almost everything will work again\nif you unplug it for a few minutes —\nincluding you.", author: "Anne Lamott" },
+  { text: "Yesterday I was clever, so I wanted to change the world.\nToday I am wise, so I am changing myself.", author: "Rumi" },
+  { text: "The truth will set you free.\nBut first, it will make you miserable.", author: "∅" },
+  { text: "We are all alone, born alone, die alone.", author: "Hunter S. Thompson" },
+  { text: "Do not go gentle\ninto that good night.", author: "Dylan Thomas" },
+  { text: "I am large,\nI contain multitudes.", author: "Walt Whitman" },
+  { text: "In the middle of difficulty\nlies opportunity.", author: "Albert Einstein" },
+  { text: "An unexamined faith\nis not worth having.", author: "∅" },
+  { text: "天下皆知美之为美，\n斯恶已。", author: "老子" },
+  { text: "至人无己，神人无功，圣人无名。", author: "庄子" },
+  { text: "圣人不积，既以为人己愈有。", author: "老子" },
+  { text: "为而不争。", author: "老子" },
+  { text: "Stars, hide your fires;\nlet not light see my dark and deep desires.", author: "Shakespeare" },
+  { text: "Our greatest glory is not in never falling,\nbut in rising every time we fall.", author: "Confucius" },
+  { text: "In the end, it's not the years in your life\nthat count. It's the life in your years.", author: "Abraham Lincoln" },
+  { text: "Time is a flat circle.\nEverything we have ever done\nor will do, we will do over and over again.", author: "Nietzsche / True Detective" },
+  { text: "Knowing yourself is the beginning\nof all wisdom.", author: "Aristotle" },
+  { text: "The more I learn,\nthe more I realize how much I don't know.", author: "Albert Einstein" },
+  { text: "We are stardust,\nbillion year old carbon.", author: "Joni Mitchell" },
+  { text: "The nitrogen in our DNA, the calcium in our teeth,\nthe iron in our blood — all were made\nin the interiors of collapsing stars.", author: "Carl Sagan" },
+  { text: "Perhaps the truth depends\non a walk around the lake.", author: "Wallace Stevens" },
+  { text: "I have no special talents.\nI am only passionately curious.", author: "Albert Einstein" },
+  { text: "Not all readers are leaders,\nbut all leaders are readers.", author: "Harry Truman" },
+  { text: "A reader lives a thousand lives\nbefore he dies. The man who never reads\nlives only one.", author: "George R.R. Martin" },
+];
+
+// ── Canvas setup ──
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, cx, cy;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  cx = W / 2; cy = H / 2;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Mouse ──
+let mouse = { x: cx, y: cy, active: false };
+const cursorEl = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+
+document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+  mouse.active = true;
+  cursorEl.style.left = e.clientX + 'px';
+  cursorEl.style.top = e.clientY + 'px';
+  cursorRing.style.left = e.clientX + 'px';
+  cursorRing.style.top = e.clientY + 'px';
+  document.getElementById('coords').textContent =
+    `α  ${(e.clientX / W * 360).toFixed(1)}°\nδ  ${((1 - e.clientY / H) * 180 - 90).toFixed(1)}°`;
+});
+
+// ── Particle system ──
+const N = 520;
+const particles = [];
+
+// Color palettes for different "star types"
+const starColors = [
+  [180, 210, 255],  // blue-white (O/B class)
+  [200, 225, 255],  // pale blue (A class)
+  [255, 255, 240],  // white (F class)
+  [255, 248, 200],  // yellow-white (G class)
+  [255, 220, 150],  // orange (K class)
+  [255, 180, 100],  // deep orange (M class)
+  [255, 140, 120],  // red giant
+  [150, 200, 255],  // blue supergiant
+  [220, 180, 255],  // purple nebula
+  [180, 255, 220],  // cyan nebula
+  [255, 200, 230],  // pink nebula
+  [255, 255, 255],  // pure white
+  [100, 180, 255],  // electric blue
+  [255, 230, 100],  // golden
+];
+
+class Particle {
+  constructor() { this.reset(true); }
+  reset(init) {
+    // Spawn in a disk pattern
+    const r = init ? Math.random() * Math.min(W, H) * 0.42 : Math.random() * Math.min(W, H) * 0.38;
+    const angle = Math.random() * Math.PI * 2;
+    this.x = cx + Math.cos(angle) * r;
+    this.y = cy + Math.sin(angle) * r;
+
+    // Orbital velocity
+    const speed = init ? (0.3 + Math.random() * 0.7) * (Math.random() < 0.5 ? 0.6 : 1) : 0.5 + Math.random() * 0.8;
+    const perpAngle = angle + Math.PI / 2;
+    this.vx = Math.cos(perpAngle) * speed * (Math.random() < 0.5 ? 1 : -1);
+    this.vy = Math.sin(perpAngle) * speed * (Math.random() < 0.5 ? 1 : -1);
+
+    const col = starColors[Math.floor(Math.random() * starColors.length)];
+    this.r = col[0]; this.g = col[1]; this.b = col[2];
+    this.size = Math.random() < 0.05 ? 1.8 + Math.random() * 1.4 : 0.6 + Math.random() * 1.1;
+    this.mass = this.size * (0.8 + Math.random() * 0.4);
+    this.alpha = 0.5 + Math.random() * 0.5;
+    this.trail = [];
+    this.maxTrail = Math.floor(4 + Math.random() * 10);
+  }
+}
+
+for (let i = 0; i < N; i++) particles.push(new Particle());
+
+// Central attractor
+const CENTER_MASS = 18000;
+const MOUSE_MASS = 6000;
+const DAMPING = 0.9995;
+const MIN_DIST = 12;
+const MAX_DIST = 500;
+
+// ── Quote cycling ──
+let quoteIndex = 0;
+let quoteVisible = false;
+const qText = document.getElementById('quote-text');
+const qAuthor = document.getElementById('quote-author');
+
+function showQuote(idx) {
+  qText.classList.remove('visible');
+  qAuthor.classList.remove('visible');
+  setTimeout(() => {
+    const q = quotes[idx % quotes.length];
+    qText.textContent = q.text;
+    qAuthor.textContent = '— ' + q.author;
+    setTimeout(() => {
+      qText.classList.add('visible');
+      qAuthor.classList.add('visible');
+    }, 100);
+  }, 800);
+}
+
+showQuote(0);
+setInterval(() => {
+  qText.classList.remove('visible');
+  qAuthor.classList.remove('visible');
+  setTimeout(() => {
+    quoteIndex = (quoteIndex + 1) % quotes.length;
+    showQuote(quoteIndex);
+  }, 2000);
+}, 60000);
+
+// ── Background star field (static) ──
+const bgStars = [];
+for (let i = 0; i < 180; i++) {
+  bgStars.push({
+    x: Math.random(),
+    y: Math.random(),
+    s: Math.random() * 0.9 + 0.2,
+    a: Math.random() * 0.4 + 0.1,
+    twinkle: Math.random() * Math.PI * 2,
+    twinkleSpeed: 0.005 + Math.random() * 0.015,
+  });
+}
+
+// ── Render ──
+let frame = 0;
+let lastTime = 0;
+
+function draw(ts) {
+  requestAnimationFrame(draw);
+  const dt = Math.min((ts - lastTime) / 16.67, 3);
+  lastTime = ts;
+  frame++;
+
+  // Clear with trail effect
+  ctx.fillStyle = 'rgba(0, 0, 2, 0.18)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Background stars twinkle
+  for (const s of bgStars) {
+    s.twinkle += s.twinkleSpeed;
+    const a = s.a * (0.6 + 0.4 * Math.sin(s.twinkle));
+    ctx.beginPath();
+    ctx.arc(s.x * W, s.y * H, s.s, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,220,255,${a})`;
+    ctx.fill();
+  }
+
+  // Central glow
+  const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
+  cg.addColorStop(0, 'rgba(140,180,255,0.12)');
+  cg.addColorStop(0.4, 'rgba(100,140,255,0.04)');
+  cg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = cg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Mouse glow
+  if (mouse.active) {
+    const mg = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 60);
+    mg.addColorStop(0, 'rgba(180,220,255,0.08)');
+    mg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = mg;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Physics + draw
+  for (const p of particles) {
+    // Gravity toward center
+    let dx = cx - p.x;
+    let dy = cy - p.y;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+    dist = Math.max(dist, MIN_DIST);
+    const fc = CENTER_MASS / (dist * dist);
+    p.vx += (dx / dist) * fc * dt * 0.016;
+    p.vy += (dy / dist) * fc * dt * 0.016;
+
+    // Mouse gravity
+    if (mouse.active) {
+      dx = mouse.x - p.x;
+      dy = mouse.y - p.y;
+      dist = Math.sqrt(dx * dx + dy * dy);
+      dist = Math.max(dist, MIN_DIST);
+      if (dist < MAX_DIST) {
+        const fm = MOUSE_MASS / (dist * dist);
+        p.vx += (dx / dist) * fm * dt * 0.016;
+        p.vy += (dy / dist) * fm * dt * 0.016;
+      }
+    }
+
+    // Damping
+    p.vx *= DAMPING;
+    p.vy *= DAMPING;
+
+    // Speed cap
+    const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (spd > 5) { p.vx = p.vx / spd * 5; p.vy = p.vy / spd * 5; }
+
+    // Move
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+
+    // Out of bounds → reset
+    if (p.x < -100 || p.x > W + 100 || p.y < -100 || p.y > H + 100) p.reset(false);
+
+    // Trail
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > p.maxTrail) p.trail.shift();
+
+    // Draw trail
+    if (p.trail.length > 1) {
+      for (let i = 1; i < p.trail.length; i++) {
+        const t = i / p.trail.length;
+        ctx.beginPath();
+        ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
+        ctx.lineTo(p.trail[i].x, p.trail[i].y);
+        ctx.strokeStyle = `rgba(${p.r},${p.g},${p.b},${t * p.alpha * 0.3})`;
+        ctx.lineWidth = p.size * t * 0.5;
+        ctx.stroke();
+      }
+    }
+
+    // Draw particle
+    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
+    glow.addColorStop(0, `rgba(${p.r},${p.g},${p.b},${p.alpha})`);
+    glow.addColorStop(0.4, `rgba(${p.r},${p.g},${p.b},${p.alpha * 0.4})`);
+    glow.addColorStop(1, `rgba(${p.r},${p.g},${p.b},0)`);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+    ctx.fillStyle = glow;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * 0.6, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.alpha})`;
+    ctx.fill();
+  }
+
+  // Central star
+  const pulse = 1 + 0.08 * Math.sin(frame * 0.03);
+  const cstar = ctx.createRadialGradient(cx, cy, 0, cx, cy, 14 * pulse);
+  cstar.addColorStop(0, 'rgba(255,255,255,0.95)');
+  cstar.addColorStop(0.2, 'rgba(200,225,255,0.6)');
+  cstar.addColorStop(0.6, 'rgba(140,180,255,0.15)');
+  cstar.addColorStop(1, 'rgba(0,0,30,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, 14 * pulse, 0, Math.PI * 2);
+  ctx.fillStyle = cstar;
+  ctx.fill();
+}
+
+requestAnimationFrame(draw);
+</script>
 </body>
 </html>
