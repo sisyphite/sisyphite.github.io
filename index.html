@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@300;400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  ::selection { background: rgba(104,199,201,0.3); color: #fff; }
 
   body {
     background: #000;
@@ -16,230 +17,125 @@
     height: 100vh;
     cursor: none;
   }
+  canvas { position: fixed; inset: 0; display: block; }
 
-  canvas {
-    position: fixed;
-    inset: 0;
-    display: block;
-  }
-
-  /* Custom cursor */
   .cursor {
-    position: fixed;
-    width: 6px;
-    height: 6px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 50%;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
+    position: fixed; width: 6px; height: 6px;
+    background: rgba(255,255,255,0.9); border-radius: 50%;
+    pointer-events: none; transform: translate(-50%,-50%);
     z-index: 1000;
-    transition: transform 0.1s;
     box-shadow: 0 0 12px rgba(255,255,255,0.6), 0 0 40px rgba(180,220,255,0.3);
   }
   .cursor-ring {
-    position: fixed;
-    width: 32px;
-    height: 32px;
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 50%;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    z-index: 999;
-    transition: transform 0.15s, width 0.3s, height 0.3s, opacity 0.3s;
+    position: fixed; width: 32px; height: 32px;
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 50%;
+    pointer-events: none; transform: translate(-50%,-50%);
+    z-index: 999; transition: all 0.15s;
   }
 
-  /* Quote overlay */
   .quote-container {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    z-index: 10;
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    pointer-events: none; z-index: 10;
   }
-
-  .quote-wrap {
-    text-align: center;
-    max-width: 560px;
-    padding: 0 40px;
-  }
-
+  .quote-wrap { text-align: center; max-width: 560px; padding: 0 40px; }
   .quote-text {
     font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-weight: 300;
+    font-style: italic; font-weight: 300;
     font-size: clamp(18px, 2.2vw, 26px);
-    color: rgba(255, 255, 255, 0.0);
-    line-height: 1.75;
-    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0);
+    line-height: 1.75; letter-spacing: 0.02em;
     text-shadow: 0 0 40px rgba(160,200,255,0.4);
-    transition: color 2s ease, opacity 2s ease;
+    transition: color 2s ease;
   }
-  .quote-text.visible {
-    color: rgba(255, 255, 255, 0.82);
-  }
-
+  .quote-text.visible { color: rgba(255,255,255,0.82); }
   .quote-author {
     margin-top: 18px;
-    font-family: 'Cinzel', serif;
-    font-weight: 300;
+    font-family: 'Cinzel', serif; font-weight: 300;
     font-size: clamp(9px, 0.85vw, 11px);
-    letter-spacing: 0.35em;
-    color: rgba(255,255,255,0.0);
-    text-transform: uppercase;
-    transition: color 2s ease 0.4s;
+    letter-spacing: 0.35em; color: rgba(255,255,255,0);
+    text-transform: uppercase; transition: color 2s ease 0.4s;
   }
-  .quote-author.visible {
-    color: rgba(160, 200, 255, 0.55);
-  }
+  .quote-author.visible { color: rgba(160,200,255,0.55); }
 
-  /* Name / title */
   .name-tag {
-    position: fixed;
-    bottom: 36px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Cinzel', serif;
-    font-weight: 300;
-    font-size: 11px;
-    letter-spacing: 0.4em;
-    color: rgba(255,255,255,0.18);
-    z-index: 10;
-    pointer-events: none;
-    text-transform: uppercase;
-    white-space: nowrap;
+    position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+    font-family: 'Cinzel', serif; font-weight: 300; font-size: 11px;
+    letter-spacing: 0.4em; color: rgba(255,255,255,0.18);
+    z-index: 10; pointer-events: none; text-transform: uppercase; white-space: nowrap;
   }
-
-  /* Corner coord display */
   .coords {
-    position: fixed;
-    top: 28px;
-    right: 32px;
-    font-family: 'Cinzel', serif;
-    font-size: 9px;
-    letter-spacing: 0.25em;
-    color: rgba(255,255,255,0.12);
-    z-index: 10;
-    pointer-events: none;
-    line-height: 1.8;
+    position: fixed; top: 28px; right: 32px;
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.25em; color: rgba(255,255,255,0.12);
+    z-index: 10; pointer-events: none; line-height: 1.8;
+  }
+  .made-by {
+    position: fixed; bottom: 28px; right: 32px;
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.25em; color: rgba(255,255,255,0.1);
+    z-index: 10; pointer-events: none; text-transform: uppercase;
   }
 
-  /* PORTAL PANEL */
+  /* PORTAL */
   .portal-toggle {
-    position: fixed;
-    bottom: 28px;
-    left: 28px;
-    z-index: 200;
-    width: 36px;
-    height: 36px;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 50%;
-    background: rgba(0,0,0,0.5);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: rgba(255,255,255,0.4);
-    transition: all 0.25s;
-    backdrop-filter: blur(4px);
+    position: fixed; bottom: 28px; left: 28px; z-index: 200;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 50%;
+    background: rgba(0,0,0,0.5); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: rgba(255,255,255,0.4);
+    transition: all 0.25s; backdrop-filter: blur(4px);
   }
   .portal-toggle:hover {
-    border-color: rgba(255,255,255,0.4);
-    color: rgba(255,255,255,0.8);
+    border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8);
     box-shadow: 0 0 20px rgba(180,220,255,0.15);
   }
-
   .portal-panel {
-    position: fixed;
-    bottom: 72px;
-    left: 28px;
-    z-index: 200;
+    position: fixed; bottom: 72px; left: 28px; z-index: 200;
     width: 220px;
     background: rgba(4,8,14,0.88);
     border: 1px solid rgba(255,255,255,0.1);
     backdrop-filter: blur(12px);
-    padding: 0;
     transform-origin: bottom left;
     transform: scale(0.92) translateY(8px);
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0; pointer-events: none;
     transition: all 0.22s ease;
   }
-  .portal-panel.open {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-    pointer-events: all;
-  }
-
+  .portal-panel.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
   .portal-header {
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    font-family: 'Cinzel', serif;
-    font-size: 9px;
-    letter-spacing: 0.3em;
-    color: rgba(255,255,255,0.25);
+    padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.3em; color: rgba(255,255,255,0.25);
     text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .portal-status {
-    width: 5px; height: 5px;
-    border-radius: 50%;
+  .portal-dot {
+    width: 5px; height: 5px; border-radius: 50%;
     background: rgba(100,200,255,0.5);
     animation: blink 2s ease infinite;
   }
-  @keyframes blink {
-    0%,100% { opacity: 0.5; }
-    50% { opacity: 1; }
-  }
-
-  .portal-list {
-    padding: 6px 0;
-    max-height: 280px;
-    overflow-y: auto;
-  }
-  .portal-list::-webkit-scrollbar { width: 2px; }
-  .portal-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
-
+  @keyframes blink { 0%,100%{opacity:0.5} 50%{opacity:1} }
+  .portal-list { padding: 6px 0; }
   .portal-item {
-    display: block;
-    padding: 9px 14px;
-    font-family: 'Cinzel', serif;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: rgba(255,255,255,0.45);
-    text-decoration: none;
-    transition: all 0.15s;
+    display: block; padding: 9px 14px;
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 0.15em; color: rgba(255,255,255,0.45);
+    text-decoration: none; transition: all 0.15s;
     border-left: 2px solid transparent;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .portal-item:hover {
     color: rgba(200,230,255,0.9);
     border-left-color: rgba(180,220,255,0.4);
     background: rgba(180,220,255,0.04);
-    letter-spacing: 0.18em;
-  }
-
-  .portal-loading {
-    padding: 14px;
-    font-family: 'Cinzel', serif;
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    color: rgba(255,255,255,0.2);
-    text-align: center;
   }
 </style>
 </head>
 <body>
 
 <canvas id="c"></canvas>
-
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursor-ring"></div>
 
@@ -250,26 +146,20 @@
   </div>
 </div>
 
-<div class="name-tag" id="name-tag">— sisyphite.github.io —</div>
-
-<div style="position:fixed;bottom:28px;right:32px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.25em;color:rgba(255,255,255,0.1);z-index:10;pointer-events:none;text-transform:uppercase;">made by Claude</div>
-
+<div class="name-tag">— sisyphite.github.io —</div>
+<div class="made-by">made by Claude</div>
 <div class="coords" id="coords"></div>
 
-<!-- PORTAL -->
-<button class="portal-toggle" id="portal-toggle" onclick="togglePortal()" title="My Pages">⊹</button>
+<button class="portal-toggle" id="portal-toggle" title="My Pages">⊹</button>
 <div class="portal-panel" id="portal-panel">
   <div class="portal-header">
-    <span>SISYPHITE.GITHUB.IO</span>
-    <div class="portal-status"></div>
+    <span>MY PAGES</span>
+    <div class="portal-dot"></div>
   </div>
-  <div class="portal-list" id="portal-list">
-    <div class="portal-loading">LOADING...</div>
-  </div>
+  <div class="portal-list" id="portal-list"></div>
 </div>
 
 <script>
-// ── Quotes ──
 const quotes = [
   { text: "The cosmos is within us.\nWe are made of star-stuff.", author: "Carl Sagan" },
   { text: "Existence precedes essence.", author: "Jean-Paul Sartre" },
@@ -375,365 +265,214 @@ let W, H, cx, cy;
 function resize() {
   W = canvas.width = window.innerWidth;
   H = canvas.height = window.innerHeight;
-  cx = W / 2; cy = H / 2;
+  cx = W/2; cy = H/2;
 }
 resize();
 window.addEventListener('resize', resize);
 
 // ── Mouse ──
 let mouse = { x: -999, y: -999, active: false };
-const cursorEl = document.getElementById('cursor');
-const cursorRing = document.getElementById('cursor-ring');
 document.addEventListener('mousemove', e => {
   mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true;
-  cursorEl.style.left = e.clientX + 'px';
-  cursorEl.style.top = e.clientY + 'px';
-  cursorRing.style.left = e.clientX + 'px';
-  cursorRing.style.top = e.clientY + 'px';
+  document.getElementById('cursor').style.cssText = `left:${e.clientX}px;top:${e.clientY}px`;
+  document.getElementById('cursor-ring').style.cssText = `left:${e.clientX}px;top:${e.clientY}px`;
   document.getElementById('coords').textContent =
-    `α  ${(e.clientX / W * 360).toFixed(1)}°\nδ  ${((1 - e.clientY / H) * 180 - 90).toFixed(1)}°`;
+    `α  ${(e.clientX/W*360).toFixed(1)}°\nδ  ${((1-e.clientY/H)*180-90).toFixed(1)}°`;
 });
+
+// ── Star colors ──
+const starColors = [
+  [180,210,255],[200,225,255],[255,255,220],[255,220,150],[255,160,100],
+  [255,130,120],[220,180,255],[180,255,220],[255,200,230],[255,230,100],
+];
 
 // ── 10 hero particles ──
 const N = 10;
-const starColors = [
-  [180, 210, 255],[200, 225, 255],[255, 255, 220],
-  [255, 220, 150],[255, 160, 100],[255, 130, 120],
-  [220, 180, 255],[180, 255, 220],[255, 200, 230],[255, 230, 100],
-];
-
 class Particle {
-  constructor(i) {
-    this.i = i;
-    this.init();
-  }
+  constructor(i) { this.i = i; this.init(); }
   init() {
-    // Spread across different orbital zones to cover screen
     const zone = this.i / N;
-    const minR = Math.min(W, H) * (0.1 + zone * 0.35);
-    const maxR = Math.min(W, H) * (0.2 + zone * 0.42);
-    const r = minR + Math.random() * (maxR - minR);
-    const angle = (this.i / N) * Math.PI * 2 + Math.random() * 0.8;
-    this.x = cx + Math.cos(angle) * r;
-    this.y = cy + Math.sin(angle) * r;
-    // Orbital velocity — enough to stay in orbit
-    const spd = 0.6 + Math.random() * 1.0;
-    const dir = Math.random() < 0.5 ? 1 : -1;
-    this.vx = Math.cos(angle + Math.PI/2) * spd * dir;
-    this.vy = Math.sin(angle + Math.PI/2) * spd * dir;
-    // Visual — will morph over time
+    const minR = Math.min(W,H) * (0.1 + zone*0.35);
+    const maxR = Math.min(W,H) * (0.2 + zone*0.42);
+    const r = minR + Math.random()*(maxR-minR);
+    const angle = (this.i/N)*Math.PI*2 + Math.random()*0.8;
+    this.x = cx + Math.cos(angle)*r;
+    this.y = cy + Math.sin(angle)*r;
+    const spd = 0.6 + Math.random()*1.0;
+    const dir = Math.random()<0.5?1:-1;
+    this.vx = Math.cos(angle+Math.PI/2)*spd*dir;
+    this.vy = Math.sin(angle+Math.PI/2)*spd*dir;
     const col = starColors[this.i % starColors.length];
-    this.r = col[0]; this.g = col[1]; this.b = col[2];
-    // Target color for morphing
-    this.tr = col[0]; this.tg = col[1]; this.tb = col[2];
-    this.size = 2 + Math.random() * 3;
+    this.r=col[0]; this.g=col[1]; this.b=col[2];
+    this.tr=col[0]; this.tg=col[1]; this.tb=col[2];
+    this.size = 2+Math.random()*3;
     this.targetSize = this.size;
-    this.alpha = 0.7 + Math.random() * 0.3;
-    this.haloSize = 30 + Math.random() * 50;
+    this.alpha = 0.7+Math.random()*0.3;
+    this.haloSize = 30+Math.random()*50;
     this.targetHalo = this.haloSize;
-    this.morphTimer = Math.random() * 200;
+    this.morphTimer = Math.random()*200;
     this.trail = [];
-    this.maxTrail = 18 + Math.floor(Math.random() * 20);
+    this.maxTrail = 18+Math.floor(Math.random()*20);
   }
   morph() {
-    // Every ~3-5 seconds smoothly shift to new color/size
     this.morphTimer--;
     if (this.morphTimer <= 0) {
-      this.morphTimer = 180 + Math.random() * 120;
-      const col = starColors[Math.floor(Math.random() * starColors.length)];
-      this.tr = col[0]; this.tg = col[1]; this.tb = col[2];
-      this.targetSize = 1.5 + Math.random() * 4;
-      this.targetHalo = 20 + Math.random() * 80;
+      this.morphTimer = 180+Math.random()*120;
+      const col = starColors[Math.floor(Math.random()*starColors.length)];
+      this.tr=col[0]; this.tg=col[1]; this.tb=col[2];
+      this.targetSize = 1.5+Math.random()*4;
+      this.targetHalo = 20+Math.random()*80;
     }
-    // Lerp toward target
     const s = 0.008;
-    this.r += (this.tr - this.r) * s;
-    this.g += (this.tg - this.g) * s;
-    this.b += (this.tb - this.b) * s;
-    this.size += (this.targetSize - this.size) * s;
-    this.haloSize += (this.targetHalo - this.haloSize) * s;
+    this.r += (this.tr-this.r)*s;
+    this.g += (this.tg-this.g)*s;
+    this.b += (this.tb-this.b)*s;
+    this.size += (this.targetSize-this.size)*s;
+    this.haloSize += (this.targetHalo-this.haloSize)*s;
   }
 }
-
 const particles = [];
-for (let i = 0; i < N; i++) particles.push(new Particle(i));
+for (let i=0;i<N;i++) particles.push(new Particle(i));
 
-// Background static stars
+// ── Background stars ──
 const bgStars = [];
-for (let i = 0; i < 220; i++) {
-  bgStars.push({
-    x: Math.random(), y: Math.random(),
-    s: Math.random() * 1.0 + 0.2,
-    a: Math.random() * 0.35 + 0.08,
-    t: Math.random() * Math.PI * 2,
-    ts: 0.003 + Math.random() * 0.008,
-  });
+for (let i=0;i<220;i++) {
+  bgStars.push({x:Math.random(),y:Math.random(),s:Math.random()*1.0+0.2,
+    a:Math.random()*0.35+0.08,t:Math.random()*Math.PI*2,ts:0.003+Math.random()*0.008});
 }
 
-// ── Quote cycling ──
+// ── Quotes ──
 let quoteIndex = 0;
 const qText = document.getElementById('quote-text');
 const qAuthor = document.getElementById('quote-author');
-
 function showQuote(idx) {
-  qText.classList.remove('visible');
-  qAuthor.classList.remove('visible');
+  qText.classList.remove('visible'); qAuthor.classList.remove('visible');
   setTimeout(() => {
     const q = quotes[idx % quotes.length];
     qText.textContent = q.text;
     qAuthor.textContent = '— ' + q.author;
-    setTimeout(() => {
-      qText.classList.add('visible');
-      qAuthor.classList.add('visible');
-    }, 100);
+    setTimeout(() => { qText.classList.add('visible'); qAuthor.classList.add('visible'); }, 100);
   }, 800);
 }
 showQuote(0);
 setInterval(() => {
-  qText.classList.remove('visible');
-  qAuthor.classList.remove('visible');
-  setTimeout(() => {
-    quoteIndex = (quoteIndex + 1) % quotes.length;
-    showQuote(quoteIndex);
-  }, 2000);
-}, 60000);
+  qText.classList.remove('visible'); qAuthor.classList.remove('visible');
+  setTimeout(() => { quoteIndex=(quoteIndex+1)%quotes.length; showQuote(quoteIndex); }, 2000);
+}, 30000);
 
-// ── Physics constants ──
-const CENTER_MASS = 14000;
-const MOUSE_MASS  = 5000;
-const DAMPING     = 0.9998;
-const MIN_DIST    = 15;
-const MAX_MOUSE   = 420;
+// ── Physics ──
+const CENTER_MASS=14000, MOUSE_MASS=5000, DAMPING=0.9998, MIN_DIST=15, MAX_MOUSE=420;
 
-// ── Throttled RAF — ~30fps ──
-let lastTime = 0;
-const TARGET_INTERVAL = 1000 / 30;
+// ── Portal ──
+// 在这里添加你的页面链接 ↓
+const myRepos = [
+  { name: 'reader',       label: 'epub reader' },
+  { name: 'realamerican', label: 'real american' },
+];
 
-function draw(ts) {
-  // ── Portal ──
-let portalOpen = false;
-let portalLoaded = false;
+(function buildPortal() {
+  const list = document.getElementById('portal-list');
+  myRepos.forEach(repo => {
+    const a = document.createElement('a');
+    a.className = 'portal-item';
+    a.href = `https://sisyphite.github.io/${repo.name}`;
+    a.target = '_blank';
+    a.textContent = repo.label || repo.name;
+    list.appendChild(a);
+  });
+})();
 
-function togglePortal() {
-  portalOpen = !portalOpen;
-  document.getElementById('portal-panel').classList.toggle('open', portalOpen);
-  if (portalOpen && !portalLoaded) loadRepos();
-}
-
-async function loadRepos() {
-  try {
-    const res = await fetch('https://api.github.com/users/sisyphite/repos?per_page=100&sort=updated');
-    const repos = await res.json();
-    const list = document.getElementById('portal-list');
-    list.innerHTML = '';
-
-    // Filter out the main github.io repo itself, sort by name
-    const filtered = repos
-      .filter(r => !r.fork && r.name !== 'sisyphite.github.io')
-      .sort((a,b) => a.name.localeCompare(b.name));
-
-    if (!filtered.length) {
-      list.innerHTML = '<div class="portal-loading">NO REPOS FOUND</div>';
-      return;
-    }
-
-    filtered.forEach(repo => {
-      const a = document.createElement('a');
-      a.className = 'portal-item';
-      a.href = `https://sisyphite.github.io/${repo.name}`;
-      a.target = '_blank';
-      a.textContent = repo.name;
-      list.appendChild(a);
-    });
-
-    portalLoaded = true;
-  } catch(e) {
-    document.getElementById('portal-list').innerHTML =
-      '<div class="portal-loading">FAILED TO LOAD</div>';
-  }
-}
-
-// Close portal when clicking outside
+document.getElementById('portal-toggle').addEventListener('click', () => {
+  document.getElementById('portal-panel').classList.toggle('open');
+});
 document.addEventListener('click', e => {
-  if (portalOpen &&
-      !e.target.closest('#portal-panel') &&
-      !e.target.closest('#portal-toggle')) {
-    portalOpen = false;
+  if (!e.target.closest('#portal-panel') && !e.target.closest('#portal-toggle')) {
     document.getElementById('portal-panel').classList.remove('open');
   }
 });
 
-requestAnimationFrame(draw);
+// ── Draw (30fps) ──
+let lastTime = 0;
+const TARGET_INTERVAL = 1000/30;
+
+function draw(ts) {
+  requestAnimationFrame(draw);
   if (ts - lastTime < TARGET_INTERVAL) return;
   lastTime = ts;
 
-  // Fade trail
   ctx.fillStyle = 'rgba(0,0,3,0.22)';
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillRect(0,0,W,H);
 
-  // Background stars
   for (const s of bgStars) {
     s.t += s.ts;
-    const a = s.a * (0.55 + 0.45 * Math.sin(s.t));
+    const a = s.a*(0.55+0.45*Math.sin(s.t));
     ctx.beginPath();
-    ctx.arc(s.x * W, s.y * H, s.s, 0, Math.PI * 2);
+    ctx.arc(s.x*W, s.y*H, s.s, 0, Math.PI*2);
     ctx.fillStyle = `rgba(210,225,255,${a.toFixed(3)})`;
     ctx.fill();
   }
 
-  // Central glow
-  const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 90);
-  cg.addColorStop(0, 'rgba(160,195,255,0.13)');
-  cg.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = cg;
-  ctx.fillRect(0, 0, W, H);
+  const cg = ctx.createRadialGradient(cx,cy,0,cx,cy,90);
+  cg.addColorStop(0,'rgba(160,195,255,0.13)'); cg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=cg; ctx.fillRect(0,0,W,H);
 
-  // Mouse glow
   if (mouse.active) {
-    const mg = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 55);
-    mg.addColorStop(0, 'rgba(180,220,255,0.07)');
-    mg.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = mg;
-    ctx.fillRect(0, 0, W, H);
+    const mg = ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,55);
+    mg.addColorStop(0,'rgba(180,220,255,0.07)'); mg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=mg; ctx.fillRect(0,0,W,H);
   }
 
-  // Particles
   for (const p of particles) {
     p.morph();
-
-    // Center gravity
-    let dx = cx - p.x, dy = cy - p.y;
-    let dist = Math.max(Math.sqrt(dx*dx + dy*dy), MIN_DIST);
-    const fc = CENTER_MASS / (dist * dist);
-    p.vx += (dx/dist) * fc * 0.016;
-    p.vy += (dy/dist) * fc * 0.016;
-
-    // Mouse gravity
+    let dx=cx-p.x, dy=cy-p.y;
+    let dist=Math.max(Math.sqrt(dx*dx+dy*dy),MIN_DIST);
+    const fc=CENTER_MASS/(dist*dist);
+    p.vx+=(dx/dist)*fc*0.016; p.vy+=(dy/dist)*fc*0.016;
     if (mouse.active) {
-      dx = mouse.x - p.x; dy = mouse.y - p.y;
-      dist = Math.max(Math.sqrt(dx*dx + dy*dy), MIN_DIST);
-      if (dist < MAX_MOUSE) {
-        const fm = MOUSE_MASS / (dist*dist);
-        p.vx += (dx/dist) * fm * 0.016;
-        p.vy += (dy/dist) * fm * 0.016;
-      }
+      dx=mouse.x-p.x; dy=mouse.y-p.y;
+      dist=Math.max(Math.sqrt(dx*dx+dy*dy),MIN_DIST);
+      if (dist<MAX_MOUSE) { const fm=MOUSE_MASS/(dist*dist); p.vx+=(dx/dist)*fm*0.016; p.vy+=(dy/dist)*fm*0.016; }
     }
+    p.vx*=DAMPING; p.vy*=DAMPING;
+    const spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+    if (spd>6){p.vx=p.vx/spd*6;p.vy=p.vy/spd*6;}
+    p.x+=p.vx; p.y+=p.vy;
+    if (p.x<-150||p.x>W+150||p.y<-150||p.y>H+150) p.init();
 
-    p.vx *= DAMPING; p.vy *= DAMPING;
-
-    // Speed cap
-    const spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
-    if (spd > 6) { p.vx = p.vx/spd*6; p.vy = p.vy/spd*6; }
-
-    p.x += p.vx; p.y += p.vy;
-
-    // Re-inject if escaped
-    if (p.x < -150 || p.x > W+150 || p.y < -150 || p.y > H+150) p.init();
-
-    // Trail
-    p.trail.push({ x: p.x, y: p.y });
-    if (p.trail.length > p.maxTrail) p.trail.shift();
-
-    // Draw trail
-    for (let i = 1; i < p.trail.length; i++) {
-      const t = i / p.trail.length;
+    p.trail.push({x:p.x,y:p.y});
+    if (p.trail.length>p.maxTrail) p.trail.shift();
+    for (let i=1;i<p.trail.length;i++) {
+      const t=i/p.trail.length;
       ctx.beginPath();
-      ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
-      ctx.lineTo(p.trail[i].x, p.trail[i].y);
-      ctx.strokeStyle = `rgba(${p.r|0},${p.g|0},${p.b|0},${(t * 0.35).toFixed(3)})`;
-      ctx.lineWidth = p.size * t * 0.7;
-      ctx.stroke();
+      ctx.moveTo(p.trail[i-1].x,p.trail[i-1].y);
+      ctx.lineTo(p.trail[i].x,p.trail[i].y);
+      ctx.strokeStyle=`rgba(${p.r|0},${p.g|0},${p.b|0},${(t*0.35).toFixed(3)})`;
+      ctx.lineWidth=p.size*t*0.7; ctx.stroke();
     }
 
-    // Halo — single radial gradient, large and soft
-    const hr = p.haloSize;
-    const hg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, hr);
-    hg.addColorStop(0,   `rgba(${p.r|0},${p.g|0},${p.b|0},0.18)`);
-    hg.addColorStop(0.3, `rgba(${p.r|0},${p.g|0},${p.b|0},0.07)`);
-    hg.addColorStop(1,   `rgba(${p.r|0},${p.g|0},${p.b|0},0)`);
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, hr, 0, Math.PI*2);
-    ctx.fillStyle = hg;
-    ctx.fill();
+    const hr=p.haloSize;
+    const hg=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,hr);
+    hg.addColorStop(0,`rgba(${p.r|0},${p.g|0},${p.b|0},0.18)`);
+    hg.addColorStop(0.3,`rgba(${p.r|0},${p.g|0},${p.b|0},0.07)`);
+    hg.addColorStop(1,`rgba(${p.r|0},${p.g|0},${p.b|0},0)`);
+    ctx.beginPath(); ctx.arc(p.x,p.y,hr,0,Math.PI*2);
+    ctx.fillStyle=hg; ctx.fill();
 
-    // Core
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-    ctx.fillStyle = `rgba(${p.r|0},${p.g|0},${p.b|0},${p.alpha.toFixed(3)})`;
-    ctx.fill();
-
-    // Bright center point
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * 0.35, 0, Math.PI*2);
-    ctx.fillStyle = `rgba(255,255,255,0.85)`;
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${p.r|0},${p.g|0},${p.b|0},${p.alpha.toFixed(3)})`; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size*0.35,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.fill();
   }
 
-  // Central star — pulsing
-  const pulse = 1 + 0.1 * Math.sin(Date.now() * 0.002);
-  const cs = ctx.createRadialGradient(cx, cy, 0, cx, cy, 16 * pulse);
-  cs.addColorStop(0,   'rgba(255,255,255,0.95)');
+  const pulse=1+0.1*Math.sin(Date.now()*0.002);
+  const cs=ctx.createRadialGradient(cx,cy,0,cx,cy,16*pulse);
+  cs.addColorStop(0,'rgba(255,255,255,0.95)');
   cs.addColorStop(0.25,'rgba(200,225,255,0.55)');
-  cs.addColorStop(0.7, 'rgba(140,180,255,0.12)');
-  cs.addColorStop(1,   'rgba(0,0,0,0)');
-  ctx.beginPath();
-  ctx.arc(cx, cy, 16 * pulse, 0, Math.PI*2);
-  ctx.fillStyle = cs;
-  ctx.fill();
+  cs.addColorStop(0.7,'rgba(140,180,255,0.12)');
+  cs.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath(); ctx.arc(cx,cy,16*pulse,0,Math.PI*2);
+  ctx.fillStyle=cs; ctx.fill();
 }
-
-// ── Portal ──
-let portalOpen = false;
-let portalLoaded = false;
-
-function togglePortal() {
-  portalOpen = !portalOpen;
-  document.getElementById('portal-panel').classList.toggle('open', portalOpen);
-  if (portalOpen && !portalLoaded) loadRepos();
-}
-
-async function loadRepos() {
-  try {
-    const res = await fetch('https://api.github.com/users/sisyphite/repos?per_page=100&sort=updated');
-    const repos = await res.json();
-    const list = document.getElementById('portal-list');
-    list.innerHTML = '';
-
-    // Filter out the main github.io repo itself, sort by name
-    const filtered = repos
-      .filter(r => !r.fork && r.name !== 'sisyphite.github.io')
-      .sort((a,b) => a.name.localeCompare(b.name));
-
-    if (!filtered.length) {
-      list.innerHTML = '<div class="portal-loading">NO REPOS FOUND</div>';
-      return;
-    }
-
-    filtered.forEach(repo => {
-      const a = document.createElement('a');
-      a.className = 'portal-item';
-      a.href = `https://sisyphite.github.io/${repo.name}`;
-      a.target = '_blank';
-      a.textContent = repo.name;
-      list.appendChild(a);
-    });
-
-    portalLoaded = true;
-  } catch(e) {
-    document.getElementById('portal-list').innerHTML =
-      '<div class="portal-loading">FAILED TO LOAD</div>';
-  }
-}
-
-// Close portal when clicking outside
-document.addEventListener('click', e => {
-  if (portalOpen &&
-      !e.target.closest('#portal-panel') &&
-      !e.target.closest('#portal-toggle')) {
-    portalOpen = false;
-    document.getElementById('portal-panel').classList.remove('open');
-  }
-});
 
 requestAnimationFrame(draw);
 </script>
