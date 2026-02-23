@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>∞</title>
+<link rel="icon" type="image/png" href="icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@300;400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -326,9 +327,43 @@ for (let i = 0; i < N; i++) particles.push(new Particle());
 // Central attractor
 const CENTER_MASS = 18000;
 const MOUSE_MASS = 6000;
-const DAMPING = 0.9995;
+const DAMPING = 0.9999;
 const MIN_DIST = 12;
 const MAX_DIST = 500;
+
+// ── Big Bang system ──
+let bigBang = null;
+
+function triggerBigBang() {
+  bigBang = { progress: 0 };
+  for (const p of particles) {
+    const angle = Math.random() * Math.PI * 2;
+    // Mix: some fast outward, some with orbital tangent for longevity
+    const isTangential = Math.random() < 0.5;
+    const speed = isTangential ? (1.2 + Math.random() * 2.5) : (3 + Math.random() * 11);
+    const launchAngle = isTangential ? angle + Math.PI/2 * (Math.random()<0.5?1:-1) : angle;
+    const spawnR = Math.random() * Math.min(W,H) * 0.08;
+    p.x = cx + Math.cos(angle) * spawnR;
+    p.y = cy + Math.sin(angle) * spawnR;
+    p.vx = Math.cos(launchAngle) * speed;
+    p.vy = Math.sin(launchAngle) * speed;
+    p.trail = [];
+    const col = starColors[Math.floor(Math.random() * starColors.length)];
+    p.r = col[0]; p.g = col[1]; p.b = col[2];
+    p.alpha = 0.6 + Math.random() * 0.4;
+    p.size = Math.random() < 0.05 ? 1.8 + Math.random() * 1.4 : 0.6 + Math.random() * 1.1;
+    p.maxTrail = Math.floor(4 + Math.random() * 10);
+  }
+}
+
+function checkBigBang() {
+  let collapsed = 0;
+  for (const p of particles) {
+    const dx = p.x - cx, dy = p.y - cy;
+    if (Math.sqrt(dx*dx + dy*dy) < 28) collapsed++;
+  }
+  if (collapsed > N * 0.88) triggerBigBang();
+}
 
 // ── Quote cycling ──
 let quoteIndex = 0;
@@ -382,6 +417,30 @@ function draw(ts) {
   const dt = Math.min((ts - lastTime) / 16.67, 3);
   lastTime = ts;
   frame++;
+
+  // Check for heat death → rebirth
+  if (frame % 120 === 0) checkBigBang();
+
+  // Big bang flash
+  if (bigBang !== null) {
+    bigBang.progress += 0.025;
+    const flashA = Math.max(0, 0.7 * (1 - bigBang.progress * 1.5));
+    if (flashA > 0) {
+      ctx.fillStyle = `rgba(200,225,255,${flashA})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+    // Shockwave ring
+    const swR = bigBang.progress * Math.max(W, H) * 0.9;
+    const swA = Math.max(0, 0.6 * (1 - bigBang.progress));
+    if (swA > 0) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, swR, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(180,220,255,${swA})`;
+      ctx.lineWidth = 3 * (1 - bigBang.progress);
+      ctx.stroke();
+    }
+    if (bigBang.progress >= 1) bigBang = null;
+  }
 
   // Clear with trail effect
   ctx.fillStyle = 'rgba(0, 0, 2, 0.18)';
@@ -450,8 +509,18 @@ function draw(ts) {
     p.x += p.vx * dt;
     p.y += p.vy * dt;
 
-    // Out of bounds → reset
-    if (p.x < -100 || p.x > W + 100 || p.y < -100 || p.y > H + 100) p.reset(false);
+    // Out of bounds → re-inject with orbital velocity
+    if (p.x < -120 || p.x > W + 120 || p.y < -120 || p.y > H + 120) {
+      const ra = Math.random() * Math.PI * 2;
+      const rr = Math.min(W,H) * (0.15 + Math.random() * 0.32);
+      p.x = cx + Math.cos(ra) * rr;
+      p.y = cy + Math.sin(ra) * rr;
+      const spd = Math.sqrt(CENTER_MASS / Math.max(rr, MIN_DIST)) * 0.016 * 18;
+      const pa = ra + Math.PI/2 * (Math.random()<0.5?1:-1);
+      p.vx = Math.cos(pa) * spd;
+      p.vy = Math.sin(pa) * spd;
+      p.trail = [];
+    }
 
     // Trail
     p.trail.push({ x: p.x, y: p.y });
