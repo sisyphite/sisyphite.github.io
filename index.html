@@ -125,6 +125,115 @@
     pointer-events: none;
     line-height: 1.8;
   }
+
+  /* PORTAL PANEL */
+  .portal-toggle {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    z-index: 200;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: rgba(255,255,255,0.4);
+    transition: all 0.25s;
+    backdrop-filter: blur(4px);
+  }
+  .portal-toggle:hover {
+    border-color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.8);
+    box-shadow: 0 0 20px rgba(180,220,255,0.15);
+  }
+
+  .portal-panel {
+    position: fixed;
+    bottom: 72px;
+    left: 28px;
+    z-index: 200;
+    width: 220px;
+    background: rgba(4,8,14,0.88);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    padding: 0;
+    transform-origin: bottom left;
+    transform: scale(0.92) translateY(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.22s ease;
+  }
+  .portal-panel.open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .portal-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.25);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .portal-status {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(100,200,255,0.5);
+    animation: blink 2s ease infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .portal-list {
+    padding: 6px 0;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .portal-list::-webkit-scrollbar { width: 2px; }
+  .portal-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+  .portal-item {
+    display: block;
+    padding: 9px 14px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .portal-item:hover {
+    color: rgba(200,230,255,0.9);
+    border-left-color: rgba(180,220,255,0.4);
+    background: rgba(180,220,255,0.04);
+    letter-spacing: 0.18em;
+  }
+
+  .portal-loading {
+    padding: 14px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.2);
+    text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -146,6 +255,18 @@
 <div style="position:fixed;bottom:28px;right:32px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.25em;color:rgba(255,255,255,0.1);z-index:10;pointer-events:none;text-transform:uppercase;">made by Claude</div>
 
 <div class="coords" id="coords"></div>
+
+<!-- PORTAL -->
+<button class="portal-toggle" id="portal-toggle" onclick="togglePortal()" title="My Pages">⊹</button>
+<div class="portal-panel" id="portal-panel">
+  <div class="portal-header">
+    <span>SISYPHITE.GITHUB.IO</span>
+    <div class="portal-status"></div>
+  </div>
+  <div class="portal-list" id="portal-list">
+    <div class="portal-loading">LOADING...</div>
+  </div>
+</div>
 
 <script>
 // ── Quotes ──
@@ -389,7 +510,68 @@ let lastTime = 0;
 const TARGET_INTERVAL = 1000 / 30;
 
 function draw(ts) {
-  requestAnimationFrame(draw);
+  // ── Portal ──
+let portalOpen = false;
+let portalLoaded = false;
+
+function togglePortal() {
+  portalOpen = !portalOpen;
+  document.getElementById('portal-panel').classList.toggle('open', portalOpen);
+  if (portalOpen && !portalLoaded) loadRepos();
+}
+
+async function loadRepos() {
+  try {
+    const res = await fetch('https://api.github.com/users/sisyphite/repos?per_page=100&sort=updated');
+    const repos = await res.json();
+    const list = document.getElementById('portal-list');
+    list.innerHTML = '';
+
+    // Filter out the main github.io repo itself, sort by name
+    const filtered = repos
+      .filter(r => !r.fork && r.name !== 'sisyphite.github.io')
+      .sort((a,b) => a.name.localeCompare(b.name));
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="portal-loading">NO REPOS FOUND</div>';
+      return;
+    }
+
+    // Add home link first
+    const home = document.createElement('a');
+    home.className = 'portal-item';
+    home.href = 'https://sisyphite.github.io';
+    home.target = '_blank';
+    home.textContent = '~ HOME';
+    list.appendChild(home);
+
+    filtered.forEach(repo => {
+      const a = document.createElement('a');
+      a.className = 'portal-item';
+      a.href = `https://sisyphite.github.io/${repo.name}`;
+      a.target = '_blank';
+      a.textContent = repo.name;
+      list.appendChild(a);
+    });
+
+    portalLoaded = true;
+  } catch(e) {
+    document.getElementById('portal-list').innerHTML =
+      '<div class="portal-loading">FAILED TO LOAD</div>';
+  }
+}
+
+// Close portal when clicking outside
+document.addEventListener('click', e => {
+  if (portalOpen &&
+      !e.target.closest('#portal-panel') &&
+      !e.target.closest('#portal-toggle')) {
+    portalOpen = false;
+    document.getElementById('portal-panel').classList.remove('open');
+  }
+});
+
+requestAnimationFrame(draw);
   if (ts - lastTime < TARGET_INTERVAL) return;
   lastTime = ts;
 
@@ -507,6 +689,67 @@ function draw(ts) {
   ctx.fillStyle = cs;
   ctx.fill();
 }
+
+// ── Portal ──
+let portalOpen = false;
+let portalLoaded = false;
+
+function togglePortal() {
+  portalOpen = !portalOpen;
+  document.getElementById('portal-panel').classList.toggle('open', portalOpen);
+  if (portalOpen && !portalLoaded) loadRepos();
+}
+
+async function loadRepos() {
+  try {
+    const res = await fetch('https://api.github.com/users/sisyphite/repos?per_page=100&sort=updated');
+    const repos = await res.json();
+    const list = document.getElementById('portal-list');
+    list.innerHTML = '';
+
+    // Filter out the main github.io repo itself, sort by name
+    const filtered = repos
+      .filter(r => !r.fork && r.name !== 'sisyphite.github.io')
+      .sort((a,b) => a.name.localeCompare(b.name));
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="portal-loading">NO REPOS FOUND</div>';
+      return;
+    }
+
+    // Add home link first
+    const home = document.createElement('a');
+    home.className = 'portal-item';
+    home.href = 'https://sisyphite.github.io';
+    home.target = '_blank';
+    home.textContent = '~ HOME';
+    list.appendChild(home);
+
+    filtered.forEach(repo => {
+      const a = document.createElement('a');
+      a.className = 'portal-item';
+      a.href = `https://sisyphite.github.io/${repo.name}`;
+      a.target = '_blank';
+      a.textContent = repo.name;
+      list.appendChild(a);
+    });
+
+    portalLoaded = true;
+  } catch(e) {
+    document.getElementById('portal-list').innerHTML =
+      '<div class="portal-loading">FAILED TO LOAD</div>';
+  }
+}
+
+// Close portal when clicking outside
+document.addEventListener('click', e => {
+  if (portalOpen &&
+      !e.target.closest('#portal-panel') &&
+      !e.target.closest('#portal-toggle')) {
+    portalOpen = false;
+    document.getElementById('portal-panel').classList.remove('open');
+  }
+});
 
 requestAnimationFrame(draw);
 </script>
