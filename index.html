@@ -537,14 +537,6 @@ async function loadRepos() {
       return;
     }
 
-    // Add home link first
-    const home = document.createElement('a');
-    home.className = 'portal-item';
-    home.href = 'https://sisyphite.github.io';
-    home.target = '_blank';
-    home.textContent = '~ HOME';
-    list.appendChild(home);
-
     filtered.forEach(repo => {
       const a = document.createElement('a');
       a.className = 'portal-item';
@@ -716,14 +708,6 @@ async function loadRepos() {
       list.innerHTML = '<div class="portal-loading">NO REPOS FOUND</div>';
       return;
     }
-
-    // Add home link first
-    const home = document.createElement('a');
-    home.className = 'portal-item';
-    home.href = 'https://sisyphite.github.io';
-    home.target = '_blank';
-    home.textContent = '~ HOME';
-    list.appendChild(home);
 
     filtered.forEach(repo => {
       const a = document.createElement('a');
