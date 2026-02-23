@@ -234,22 +234,23 @@ const quotes = [
   { text: "Stars, hide your fires;\nlet not light see my dark and deep desires.", author: "Shakespeare" },
   { text: "Our greatest glory is not in never falling,\nbut in rising every time we fall.", author: "Confucius" },
   { text: "In the end, it's not the years in your life\nthat count. It's the life in your years.", author: "Abraham Lincoln" },
-  { text: "Time is a flat circle.\nEverything we have ever done\nor will do, we will do over and over again.", author: "Nietzsche / True Detective" },
   { text: "Knowing yourself is the beginning\nof all wisdom.", author: "Aristotle" },
   { text: "The more I learn,\nthe more I realize how much I don't know.", author: "Albert Einstein" },
   { text: "We are stardust,\nbillion year old carbon.", author: "Joni Mitchell" },
-  { text: "The nitrogen in our DNA, the calcium in our teeth,\nthe iron in our blood — all were made\nin the interiors of collapsing stars.", author: "Carl Sagan" },
-  { text: "Perhaps the truth depends\non a walk around the lake.", author: "Wallace Stevens" },
   { text: "I have no special talents.\nI am only passionately curious.", author: "Albert Einstein" },
-  { text: "Not all readers are leaders,\nbut all leaders are readers.", author: "Harry Truman" },
   { text: "A reader lives a thousand lives\nbefore he dies. The man who never reads\nlives only one.", author: "George R.R. Martin" },
 ];
 
-// ── Canvas setup ──
+// Shuffle on load
+for (let i = quotes.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [quotes[i], quotes[j]] = [quotes[j], quotes[i]];
+}
+
+// ── Canvas ──
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 let W, H, cx, cy;
-
 function resize() {
   W = canvas.width = window.innerWidth;
   H = canvas.height = window.innerHeight;
@@ -259,14 +260,11 @@ resize();
 window.addEventListener('resize', resize);
 
 // ── Mouse ──
-let mouse = { x: cx, y: cy, active: false };
+let mouse = { x: -999, y: -999, active: false };
 const cursorEl = document.getElementById('cursor');
 const cursorRing = document.getElementById('cursor-ring');
-
 document.addEventListener('mousemove', e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-  mouse.active = true;
+  mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true;
   cursorEl.style.left = e.clientX + 'px';
   cursorEl.style.top = e.clientY + 'px';
   cursorRing.style.left = e.clientX + 'px';
@@ -275,99 +273,84 @@ document.addEventListener('mousemove', e => {
     `α  ${(e.clientX / W * 360).toFixed(1)}°\nδ  ${((1 - e.clientY / H) * 180 - 90).toFixed(1)}°`;
 });
 
-// ── Particle system ──
-const N = 520;
-const particles = [];
-
-// Color palettes for different "star types"
+// ── 10 hero particles ──
+const N = 10;
 const starColors = [
-  [180, 210, 255],  // blue-white (O/B class)
-  [200, 225, 255],  // pale blue (A class)
-  [255, 255, 240],  // white (F class)
-  [255, 248, 200],  // yellow-white (G class)
-  [255, 220, 150],  // orange (K class)
-  [255, 180, 100],  // deep orange (M class)
-  [255, 140, 120],  // red giant
-  [150, 200, 255],  // blue supergiant
-  [220, 180, 255],  // purple nebula
-  [180, 255, 220],  // cyan nebula
-  [255, 200, 230],  // pink nebula
-  [255, 255, 255],  // pure white
-  [100, 180, 255],  // electric blue
-  [255, 230, 100],  // golden
+  [180, 210, 255],[200, 225, 255],[255, 255, 220],
+  [255, 220, 150],[255, 160, 100],[255, 130, 120],
+  [220, 180, 255],[180, 255, 220],[255, 200, 230],[255, 230, 100],
 ];
 
 class Particle {
-  constructor() { this.reset(true); }
-  reset(init) {
-    // Spawn in a disk pattern
-    const r = init ? Math.random() * Math.min(W, H) * 0.42 : Math.random() * Math.min(W, H) * 0.38;
-    const angle = Math.random() * Math.PI * 2;
+  constructor(i) {
+    this.i = i;
+    this.init();
+  }
+  init() {
+    // Spread across different orbital zones to cover screen
+    const zone = this.i / N;
+    const minR = Math.min(W, H) * (0.1 + zone * 0.35);
+    const maxR = Math.min(W, H) * (0.2 + zone * 0.42);
+    const r = minR + Math.random() * (maxR - minR);
+    const angle = (this.i / N) * Math.PI * 2 + Math.random() * 0.8;
     this.x = cx + Math.cos(angle) * r;
     this.y = cy + Math.sin(angle) * r;
-
-    // Orbital velocity
-    const speed = init ? (0.3 + Math.random() * 0.7) * (Math.random() < 0.5 ? 0.6 : 1) : 0.5 + Math.random() * 0.8;
-    const perpAngle = angle + Math.PI / 2;
-    this.vx = Math.cos(perpAngle) * speed * (Math.random() < 0.5 ? 1 : -1);
-    this.vy = Math.sin(perpAngle) * speed * (Math.random() < 0.5 ? 1 : -1);
-
-    const col = starColors[Math.floor(Math.random() * starColors.length)];
+    // Orbital velocity — enough to stay in orbit
+    const spd = 0.6 + Math.random() * 1.0;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    this.vx = Math.cos(angle + Math.PI/2) * spd * dir;
+    this.vy = Math.sin(angle + Math.PI/2) * spd * dir;
+    // Visual — will morph over time
+    const col = starColors[this.i % starColors.length];
     this.r = col[0]; this.g = col[1]; this.b = col[2];
-    this.size = Math.random() < 0.05 ? 1.8 + Math.random() * 1.4 : 0.6 + Math.random() * 1.1;
-    this.mass = this.size * (0.8 + Math.random() * 0.4);
-    this.alpha = 0.5 + Math.random() * 0.5;
+    // Target color for morphing
+    this.tr = col[0]; this.tg = col[1]; this.tb = col[2];
+    this.size = 2 + Math.random() * 3;
+    this.targetSize = this.size;
+    this.alpha = 0.7 + Math.random() * 0.3;
+    this.haloSize = 30 + Math.random() * 50;
+    this.targetHalo = this.haloSize;
+    this.morphTimer = Math.random() * 200;
     this.trail = [];
-    this.maxTrail = Math.floor(4 + Math.random() * 10);
+    this.maxTrail = 18 + Math.floor(Math.random() * 20);
+  }
+  morph() {
+    // Every ~3-5 seconds smoothly shift to new color/size
+    this.morphTimer--;
+    if (this.morphTimer <= 0) {
+      this.morphTimer = 180 + Math.random() * 120;
+      const col = starColors[Math.floor(Math.random() * starColors.length)];
+      this.tr = col[0]; this.tg = col[1]; this.tb = col[2];
+      this.targetSize = 1.5 + Math.random() * 4;
+      this.targetHalo = 20 + Math.random() * 80;
+    }
+    // Lerp toward target
+    const s = 0.008;
+    this.r += (this.tr - this.r) * s;
+    this.g += (this.tg - this.g) * s;
+    this.b += (this.tb - this.b) * s;
+    this.size += (this.targetSize - this.size) * s;
+    this.haloSize += (this.targetHalo - this.haloSize) * s;
   }
 }
 
-for (let i = 0; i < N; i++) particles.push(new Particle());
+const particles = [];
+for (let i = 0; i < N; i++) particles.push(new Particle(i));
 
-// Central attractor
-const CENTER_MASS = 18000;
-const MOUSE_MASS = 6000;
-const DAMPING = 0.9999;
-const MIN_DIST = 12;
-const MAX_DIST = 500;
-
-// ── Big Bang system ──
-let bigBang = null;
-
-function triggerBigBang() {
-  bigBang = { progress: 0 };
-  for (const p of particles) {
-    const angle = Math.random() * Math.PI * 2;
-    // Mix: some fast outward, some with orbital tangent for longevity
-    const isTangential = Math.random() < 0.5;
-    const speed = isTangential ? (1.2 + Math.random() * 2.5) : (3 + Math.random() * 11);
-    const launchAngle = isTangential ? angle + Math.PI/2 * (Math.random()<0.5?1:-1) : angle;
-    const spawnR = Math.random() * Math.min(W,H) * 0.08;
-    p.x = cx + Math.cos(angle) * spawnR;
-    p.y = cy + Math.sin(angle) * spawnR;
-    p.vx = Math.cos(launchAngle) * speed;
-    p.vy = Math.sin(launchAngle) * speed;
-    p.trail = [];
-    const col = starColors[Math.floor(Math.random() * starColors.length)];
-    p.r = col[0]; p.g = col[1]; p.b = col[2];
-    p.alpha = 0.6 + Math.random() * 0.4;
-    p.size = Math.random() < 0.05 ? 1.8 + Math.random() * 1.4 : 0.6 + Math.random() * 1.1;
-    p.maxTrail = Math.floor(4 + Math.random() * 10);
-  }
-}
-
-function checkBigBang() {
-  let collapsed = 0;
-  for (const p of particles) {
-    const dx = p.x - cx, dy = p.y - cy;
-    if (Math.sqrt(dx*dx + dy*dy) < 28) collapsed++;
-  }
-  if (collapsed > N * 0.88) triggerBigBang();
+// Background static stars
+const bgStars = [];
+for (let i = 0; i < 220; i++) {
+  bgStars.push({
+    x: Math.random(), y: Math.random(),
+    s: Math.random() * 1.0 + 0.2,
+    a: Math.random() * 0.35 + 0.08,
+    t: Math.random() * Math.PI * 2,
+    ts: 0.003 + Math.random() * 0.008,
+  });
 }
 
 // ── Quote cycling ──
 let quoteIndex = 0;
-let quoteVisible = false;
 const qText = document.getElementById('quote-text');
 const qAuthor = document.getElementById('quote-author');
 
@@ -384,12 +367,6 @@ function showQuote(idx) {
     }, 100);
   }, 800);
 }
-
-// Shuffle quotes array on load
-for (let i = quotes.length - 1; i > 0; i--) {
-  const j = Math.floor(Math.random() * (i + 1));
-  [quotes[i], quotes[j]] = [quotes[j], quotes[i]];
-}
 showQuote(0);
 setInterval(() => {
   qText.classList.remove('visible');
@@ -398,178 +375,136 @@ setInterval(() => {
     quoteIndex = (quoteIndex + 1) % quotes.length;
     showQuote(quoteIndex);
   }, 2000);
-}, 30000);
+}, 60000);
 
-// ── Background star field (static) ──
-const bgStars = [];
-for (let i = 0; i < 180; i++) {
-  bgStars.push({
-    x: Math.random(),
-    y: Math.random(),
-    s: Math.random() * 0.9 + 0.2,
-    a: Math.random() * 0.4 + 0.1,
-    twinkle: Math.random() * Math.PI * 2,
-    twinkleSpeed: 0.005 + Math.random() * 0.015,
-  });
-}
+// ── Physics constants ──
+const CENTER_MASS = 14000;
+const MOUSE_MASS  = 5000;
+const DAMPING     = 0.9998;
+const MIN_DIST    = 15;
+const MAX_MOUSE   = 420;
 
-// ── Render ──
-let frame = 0;
+// ── Throttled RAF — ~30fps ──
 let lastTime = 0;
+const TARGET_INTERVAL = 1000 / 30;
 
 function draw(ts) {
   requestAnimationFrame(draw);
-  const dt = Math.min((ts - lastTime) / 16.67, 3);
+  if (ts - lastTime < TARGET_INTERVAL) return;
   lastTime = ts;
-  frame++;
 
-  // Check for heat death → rebirth
-  if (frame % 120 === 0) checkBigBang();
-
-  // Big bang flash
-  if (bigBang !== null) {
-    bigBang.progress += 0.025;
-    const flashA = Math.max(0, 0.7 * (1 - bigBang.progress * 1.5));
-    if (flashA > 0) {
-      ctx.fillStyle = `rgba(200,225,255,${flashA})`;
-      ctx.fillRect(0, 0, W, H);
-    }
-    // Shockwave ring
-    const swR = bigBang.progress * Math.max(W, H) * 0.9;
-    const swA = Math.max(0, 0.6 * (1 - bigBang.progress));
-    if (swA > 0) {
-      ctx.beginPath();
-      ctx.arc(cx, cy, swR, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(180,220,255,${swA})`;
-      ctx.lineWidth = 3 * (1 - bigBang.progress);
-      ctx.stroke();
-    }
-    if (bigBang.progress >= 1) bigBang = null;
-  }
-
-  // Clear with trail effect
-  ctx.fillStyle = 'rgba(0, 0, 2, 0.18)';
+  // Fade trail
+  ctx.fillStyle = 'rgba(0,0,3,0.22)';
   ctx.fillRect(0, 0, W, H);
 
-  // Background stars twinkle
+  // Background stars
   for (const s of bgStars) {
-    s.twinkle += s.twinkleSpeed;
-    const a = s.a * (0.6 + 0.4 * Math.sin(s.twinkle));
+    s.t += s.ts;
+    const a = s.a * (0.55 + 0.45 * Math.sin(s.t));
     ctx.beginPath();
     ctx.arc(s.x * W, s.y * H, s.s, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(200,220,255,${a})`;
+    ctx.fillStyle = `rgba(210,225,255,${a.toFixed(3)})`;
     ctx.fill();
   }
 
   // Central glow
-  const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
-  cg.addColorStop(0, 'rgba(140,180,255,0.12)');
-  cg.addColorStop(0.4, 'rgba(100,140,255,0.04)');
+  const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 90);
+  cg.addColorStop(0, 'rgba(160,195,255,0.13)');
   cg.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = cg;
   ctx.fillRect(0, 0, W, H);
 
   // Mouse glow
   if (mouse.active) {
-    const mg = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 60);
-    mg.addColorStop(0, 'rgba(180,220,255,0.08)');
+    const mg = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 55);
+    mg.addColorStop(0, 'rgba(180,220,255,0.07)');
     mg.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = mg;
     ctx.fillRect(0, 0, W, H);
   }
 
-  // Physics + draw
+  // Particles
   for (const p of particles) {
-    // Gravity toward center
-    let dx = cx - p.x;
-    let dy = cy - p.y;
-    let dist = Math.sqrt(dx * dx + dy * dy);
-    dist = Math.max(dist, MIN_DIST);
+    p.morph();
+
+    // Center gravity
+    let dx = cx - p.x, dy = cy - p.y;
+    let dist = Math.max(Math.sqrt(dx*dx + dy*dy), MIN_DIST);
     const fc = CENTER_MASS / (dist * dist);
-    p.vx += (dx / dist) * fc * dt * 0.016;
-    p.vy += (dy / dist) * fc * dt * 0.016;
+    p.vx += (dx/dist) * fc * 0.016;
+    p.vy += (dy/dist) * fc * 0.016;
 
     // Mouse gravity
     if (mouse.active) {
-      dx = mouse.x - p.x;
-      dy = mouse.y - p.y;
-      dist = Math.sqrt(dx * dx + dy * dy);
-      dist = Math.max(dist, MIN_DIST);
-      if (dist < MAX_DIST) {
-        const fm = MOUSE_MASS / (dist * dist);
-        p.vx += (dx / dist) * fm * dt * 0.016;
-        p.vy += (dy / dist) * fm * dt * 0.016;
+      dx = mouse.x - p.x; dy = mouse.y - p.y;
+      dist = Math.max(Math.sqrt(dx*dx + dy*dy), MIN_DIST);
+      if (dist < MAX_MOUSE) {
+        const fm = MOUSE_MASS / (dist*dist);
+        p.vx += (dx/dist) * fm * 0.016;
+        p.vy += (dy/dist) * fm * 0.016;
       }
     }
 
-    // Damping
-    p.vx *= DAMPING;
-    p.vy *= DAMPING;
+    p.vx *= DAMPING; p.vy *= DAMPING;
 
     // Speed cap
-    const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-    if (spd > 5) { p.vx = p.vx / spd * 5; p.vy = p.vy / spd * 5; }
+    const spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+    if (spd > 6) { p.vx = p.vx/spd*6; p.vy = p.vy/spd*6; }
 
-    // Move
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
+    p.x += p.vx; p.y += p.vy;
 
-    // Out of bounds → re-inject with orbital velocity
-    if (p.x < -120 || p.x > W + 120 || p.y < -120 || p.y > H + 120) {
-      const ra = Math.random() * Math.PI * 2;
-      const rr = Math.min(W,H) * (0.15 + Math.random() * 0.32);
-      p.x = cx + Math.cos(ra) * rr;
-      p.y = cy + Math.sin(ra) * rr;
-      const spd = Math.sqrt(CENTER_MASS / Math.max(rr, MIN_DIST)) * 0.016 * 18;
-      const pa = ra + Math.PI/2 * (Math.random()<0.5?1:-1);
-      p.vx = Math.cos(pa) * spd;
-      p.vy = Math.sin(pa) * spd;
-      p.trail = [];
-    }
+    // Re-inject if escaped
+    if (p.x < -150 || p.x > W+150 || p.y < -150 || p.y > H+150) p.init();
 
     // Trail
     p.trail.push({ x: p.x, y: p.y });
     if (p.trail.length > p.maxTrail) p.trail.shift();
 
     // Draw trail
-    if (p.trail.length > 1) {
-      for (let i = 1; i < p.trail.length; i++) {
-        const t = i / p.trail.length;
-        ctx.beginPath();
-        ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
-        ctx.lineTo(p.trail[i].x, p.trail[i].y);
-        ctx.strokeStyle = `rgba(${p.r},${p.g},${p.b},${t * p.alpha * 0.3})`;
-        ctx.lineWidth = p.size * t * 0.5;
-        ctx.stroke();
-      }
+    for (let i = 1; i < p.trail.length; i++) {
+      const t = i / p.trail.length;
+      ctx.beginPath();
+      ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
+      ctx.lineTo(p.trail[i].x, p.trail[i].y);
+      ctx.strokeStyle = `rgba(${p.r|0},${p.g|0},${p.b|0},${(t * 0.35).toFixed(3)})`;
+      ctx.lineWidth = p.size * t * 0.7;
+      ctx.stroke();
     }
 
-    // Draw particle
-    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
-    glow.addColorStop(0, `rgba(${p.r},${p.g},${p.b},${p.alpha})`);
-    glow.addColorStop(0.4, `rgba(${p.r},${p.g},${p.b},${p.alpha * 0.4})`);
-    glow.addColorStop(1, `rgba(${p.r},${p.g},${p.b},0)`);
+    // Halo — single radial gradient, large and soft
+    const hr = p.haloSize;
+    const hg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, hr);
+    hg.addColorStop(0,   `rgba(${p.r|0},${p.g|0},${p.b|0},0.18)`);
+    hg.addColorStop(0.3, `rgba(${p.r|0},${p.g|0},${p.b|0},0.07)`);
+    hg.addColorStop(1,   `rgba(${p.r|0},${p.g|0},${p.b|0},0)`);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
-    ctx.fillStyle = glow;
+    ctx.arc(p.x, p.y, hr, 0, Math.PI*2);
+    ctx.fillStyle = hg;
     ctx.fill();
 
+    // Core
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * 0.6, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.alpha})`;
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(${p.r|0},${p.g|0},${p.b|0},${p.alpha.toFixed(3)})`;
+    ctx.fill();
+
+    // Bright center point
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * 0.35, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,0.85)`;
     ctx.fill();
   }
 
-  // Central star
-  const pulse = 1 + 0.08 * Math.sin(frame * 0.03);
-  const cstar = ctx.createRadialGradient(cx, cy, 0, cx, cy, 14 * pulse);
-  cstar.addColorStop(0, 'rgba(255,255,255,0.95)');
-  cstar.addColorStop(0.2, 'rgba(200,225,255,0.6)');
-  cstar.addColorStop(0.6, 'rgba(140,180,255,0.15)');
-  cstar.addColorStop(1, 'rgba(0,0,30,0)');
+  // Central star — pulsing
+  const pulse = 1 + 0.1 * Math.sin(Date.now() * 0.002);
+  const cs = ctx.createRadialGradient(cx, cy, 0, cx, cy, 16 * pulse);
+  cs.addColorStop(0,   'rgba(255,255,255,0.95)');
+  cs.addColorStop(0.25,'rgba(200,225,255,0.55)');
+  cs.addColorStop(0.7, 'rgba(140,180,255,0.12)');
+  cs.addColorStop(1,   'rgba(0,0,0,0)');
   ctx.beginPath();
-  ctx.arc(cx, cy, 14 * pulse, 0, Math.PI * 2);
-  ctx.fillStyle = cstar;
+  ctx.arc(cx, cy, 16 * pulse, 0, Math.PI*2);
+  ctx.fillStyle = cs;
   ctx.fill();
 }
 
