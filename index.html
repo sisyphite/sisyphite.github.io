@@ -145,7 +145,7 @@
   </div>
 </div>
 
-<div class="name-tag">— sisyphite.github.io —</div>
+<div class="name-tag">— sisyphite —</div>
 <div class="made-by">made by Claude</div>
 <div class="coords" id="coords"></div>
 
@@ -818,7 +818,7 @@ const myRepos = [
   myRepos.forEach(repo => {
     const a = document.createElement('a');
     a.className = 'portal-item';
-    a.href = `https://sisyphite.github.io/${repo.name}`;
+    a.href = `/${repo.name}/`;
     a.target = '_blank';
     a.textContent = repo.label || repo.name;
     list.appendChild(a);
